@@ -1,5 +1,139 @@
-
-
+import numpy as np
+from enum import Enum
+class Direction(Enum):
+    UP = (-1, 0)
+    DOWN = (1, 0)
+    LEFT = (0, -1)
+    RIGHT = (0, 1)
 class Program:
-    def __init__(self):
-        pass
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.map_matrix = self.read_map()
+        #self.update_percepts()
+    def custom_split(self, line):
+        elements = []
+        current_element = ''
+        for char in line:
+            if char == '.':
+                if current_element:
+                    
+                    elements.append(current_element)
+                    current_element = '' 
+            else:
+                current_element += char
+            
+        if current_element:
+            elements.append(current_element)
+        return elements
+    def read_map(self):
+        with open(self.file_path, 'r') as file:
+            lines = file.readlines()
+        
+        
+        N = int(lines[0].strip())
+        
+        
+        map_matrix = [['-' for _ in range(N)] for _ in range(N)]
+        
+        
+        for i in range(1, N+1):
+            row = self.custom_split(lines[i].strip())
+            map_matrix[i-1] = row
+            
+            
+         
+        return map_matrix
+    def update_percepts(self):
+        N = len(self.map_matrix)
+        directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
+        
+        for i in range(N):
+            for j in range(N):
+                if  self.map_matrix[i][j] == 'W':  # Wumpus
+                    for direction in directions:
+                        ni, nj = i + direction.value[0], j + direction.value[1]
+                        if 0 <= ni < N and 0 <= nj < N:
+                            if self.map_matrix[ni][nj] == '-':
+                                self.map_matrix[ni][nj] = 'S'
+                            else:
+                                self.map_matrix[ni][nj] += '/S' # Stench
+                             
+                if  self.map_matrix[i][j]== 'P':  # Pit
+                    for direction in directions:
+                        ni, nj = i + direction.value[0], j + direction.value[1]
+                        if 0 <= ni < N and 0 <= nj < N:
+                            if self.map_matrix[ni][nj] == '-':
+                                self.map_matrix[ni][nj] = 'B'
+                            else:
+                                self.map_matrix[ni][nj] += '/B'  # Breeze
+                if  self.map_matrix[i][j] == 'P_G' :  # Poisonous Gas
+                    for direction in directions:
+                        ni, nj = i + direction.value[0], j + direction.value[1]
+                        if 0 <= ni < N and 0 <= nj < N:
+                            if self.map_matrix[ni][nj] == '-':
+                                self.map_matrix[ni][nj] = 'W_H'
+                            else:
+                                self.map_matrix[ni][nj] += '/W_H'  # Whiff
+                if  self.map_matrix[i][j] == 'H_P':  # Healing Potions
+                    for direction in directions:
+                        ni, nj = i + direction.value[0], j + direction.value[1]
+                        if 0 <= ni < N and 0 <= nj < N:
+                            if self.map_matrix[ni][nj] == '-':
+                                self.map_matrix[ni][nj] = 'G_L'
+                            else:
+                                self.map_matrix[ni][nj] += '/G_L'  # Glow
+        
+    def display_map(self):
+        
+        for row in self.map_matrix:
+            print(' '.join(row))
+
+    # grab gold and Health Potion
+    def grab(self, target_position):
+        x, y = target_position
+        if 'H' in self.map_matrix[x][y]:
+            self.map_matrix[x][y] = self.map_matrix[x][y].replace('H', '-')
+            return "HP grabbed"
+        elif 'G' in self.map_matrix[x][y]:
+            self.map_matrix[x][y] = self.map_matrix[x][y].replace('G', '-')
+            return "Gold grabbed"
+        return "No gold or HP here"
+    # info about the cell in front of the agent
+    def info_forward(self, target_position):
+        x, y = target_position
+        return self.map_matrix[x][y]
+    
+    # shoot at the target position
+    def shoot(self, target_position):
+        x, y = target_position
+        if 'W' in self.map_matrix[x][y]:  
+            self.map_matrix[x][y] = self.map_matrix[x][y].replace('W', '-')
+            return "Hit"
+        return "Miss"
+
+    # action: forward, grab, shoot
+    # target_position: (x, y)
+    def actionResult(self, action, target_position=None):
+        if action == 'forward':
+            if target_position is None:
+                return "Target position required for move forward"
+            return self.info_forward(target_position)
+        elif action == 'grab':
+            return self.grab()
+        elif action == 'shoot':
+            if target_position is None:
+                return "Target position required for shooting"
+            return self.shoot(target_position)
+        else:
+            return "Invalid action"
+
+                                            ##### TEST MAP #####
+file_path = 'map1.txt'
+program = Program(file_path)
+print('Initial map:')
+program.display_map()
+print('Updated map:')
+program.update_percepts()
+program.display_map()
+
+
