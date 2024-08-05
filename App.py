@@ -15,7 +15,7 @@ class Window:
 
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
-        font_url = None
+        font_url = "./Assets/Poppins.ttf"
         self.text_font = pygame.font.Font(font_url, 40)
 
     def run(self) -> None:
