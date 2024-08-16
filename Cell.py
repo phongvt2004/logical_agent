@@ -85,6 +85,40 @@ class Cell:
 
     def grab_gold(self):
         self.percept[0] = False
+    
+    #heal
+    def heal(self):
+        #delete healing potion
+        self.percept[5] = False
+
+        #Get adjacent cells of the healing potion cell
+        adj_cells = self.get_adj_cell_list(cell_matrix)
+
+        for glow_cell in adj_cells:
+            if not any(adj_cell.exist_healingpotion() for adj_cell in glow_cell.get_adj_cell_list(cell_matrix)):
+                #Remove glow perception from the glow cell
+                glow_cell.percept[8] = False
+                self.update_kb_glow(kb, glow_cell, cell_matrix)
+    
+
+    def update_kb_glow(self, kb, glow_cell, cell_matrix):
+        #Remove existing clause: glow at this cell
+        literal = self.get_literal(Object.GLOW, '+')
+        kb.del_clause([literal])
+
+        #Add clause: No glow at this cell
+        literal = self.get_literal(Object.GLOW, '-')
+        kb.add_clause([literal])
+
+        #Remove clauses related to glow propagation
+        adj_cells = glow_cell.get_adj_cell_list(cell_matrix)
+        kb.del_clause([glow_cell.get_literal(Object.GLOW, '-')])
+
+        #Iterate through each adjacent cell to remove related clauses
+        for adj_cell in adj_cells:
+            #Remove clause: If healing potion exists in any adjacent cell, there should be a glow
+            kb.del_clause([glow_cell.get_literal(Object.GLOW, '+'), adj_cell.get_literal(Object.HEALINGPOTION, '-')])
+            
 
     def kill_wumpus(self, cell_matrix, kb):
         # Delete Wumpus.
