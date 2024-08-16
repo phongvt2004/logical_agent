@@ -49,7 +49,24 @@ class Cell:
                 continue
             else:
                 raise TypeError('Error: Cell.init')
-            
+    def get_literal(self, obj: Object, sign='+'):    # sign='-': not operator
+        index_mapping = {
+            Object.PIT: 1,
+            Object.WUMPUS: 2,
+            Object.BREEZE: 3,
+            Object.STENCH: 4,
+            Object.HEALINGPOTION: 5,
+            Object.POISONOUSGAS: 6,
+            Object.WHIFF: 7,
+            Object.GLOW: 8
+        }
+
+        if obj not in index_mapping:
+            raise ValueError('Error in MapCell.formulate_literal')
+
+        factor = 10 ** len(str(self.map_size ** 2))
+        literal = index_mapping[obj] * factor + self.index_pos
+        return -literal if sign == '-' else literal       
     def exist_gold(self):
         return self.percept[0]
 
@@ -78,16 +95,27 @@ class Cell:
         return self.percept[8]
     
     def is_OK(self):
-         return not (self.exist_breeze() or self.exist_stench() or self.exist_poisonousgas() or self.exist_whiff())
+         return not (self.exist_breeze() or self.exist_stench() or self.exist_whiff())
     
-    def update_parent_cell(self, parent_cell):
+    def update_parent(self, parent_cell):
         self.parent = parent_cell
 
     def grab_gold(self):
         self.percept[0] = False
-    
+    def get_adj_cell_list(self, cell_matrix):
+        adj_cell_list = []
+        adj_cell_matrix_pos_list = [(self.matrix_pos[0], self.matrix_pos[1] + 1),   # Right
+                                    (self.matrix_pos[0], self.matrix_pos[1] - 1),   # Left
+                                    (self.matrix_pos[0] - 1, self.matrix_pos[1]),   # Up
+                                    (self.matrix_pos[0] + 1, self.matrix_pos[1])]   # Down
+
+        for adj_cell_matrix_pos in adj_cell_matrix_pos_list:
+            if 0 <= adj_cell_matrix_pos[0] < self.map_size and 0 <= adj_cell_matrix_pos[1] < self.map_size:
+                adj_cell_list.append(cell_matrix[adj_cell_matrix_pos[0]][adj_cell_matrix_pos[1]])
+
+        return adj_cell_list
     #heal
-    def heal(self):
+    def grab_heal(self, kb, glow_cell, cell_matrix):
         #delete healing potion
         self.percept[5] = False
 
@@ -118,7 +146,7 @@ class Cell:
         for adj_cell in adj_cells:
             #Remove clause: If healing potion exists in any adjacent cell, there should be a glow
             kb.del_clause([glow_cell.get_literal(Object.GLOW, '+'), adj_cell.get_literal(Object.HEALINGPOTION, '-')])
-            
+
 
     def kill_wumpus(self, cell_matrix, kb):
         # Delete Wumpus.
@@ -151,18 +179,7 @@ class Cell:
             # Remove clause: If Wumpus exists in any adjacent cell, there should be a stench.
             kb.del_clause([stench_cell.get_literal(Object.STENCH, '+'), adj_cell.get_literal(Object.WUMPUS, '-')])
 
-    def get_adj_cell_list(self, cell_matrix):
-        adj_cell_list = []
-        adj_cell_matrix_pos_list = [(self.matrix_pos[0], self.matrix_pos[1] + 1),   # Right
-                                    (self.matrix_pos[0], self.matrix_pos[1] - 1),   # Left
-                                    (self.matrix_pos[0] - 1, self.matrix_pos[1]),   # Up
-                                    (self.matrix_pos[0] + 1, self.matrix_pos[1])]   # Down
-
-        for ajd_cell_matrix_pos in adj_cell_matrix_pos_list:
-            if 0 <= ajd_cell_matrix_pos[0] < self.map_size and 0 <= ajd_cell_matrix_pos[1] < self.map_size:
-                adj_cell_list.append(cell_matrix[ajd_cell_matrix_pos[0]][ajd_cell_matrix_pos[1]])
-
-        return adj_cell_list
+    
 
 
     def is_explored(self):
@@ -179,21 +196,4 @@ class Cell:
                 adj_cell.update_parent(self)
 
 
-    def get_literal(self, obj: Object, sign='+'):    # sign='-': not operator
-        index_mapping = {
-            Object.PIT: 1,
-            Object.WUMPUS: 2,
-            Object.BREEZE: 3,
-            Object.STENCH: 4,
-            Object.HEALINGPOTION: 5,
-            Object.POISONOUSGAS: 6,
-            Object.WHIFF: 7,
-            Object.GLOW: 8
-        }
-
-        if obj not in index_mapping:
-            raise ValueError('Error in MapCell.formulate_literal')
-
-        factor = 10 ** len(str(self.grid_size ** 2))
-        literal = index_mapping[obj] * factor + self.index_position
-        return -literal if sign == '-' else literal
+    
