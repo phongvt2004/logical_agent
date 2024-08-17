@@ -1,4 +1,5 @@
 from enum import Enum
+
 class Object(Enum):
     GOLD   = 'G'
     PIT    = 'P'
@@ -6,11 +7,12 @@ class Object(Enum):
     BREEZE = 'B'
     STENCH = 'S'
     AGENT  = 'A'
-    EMPTY  = '-'
+    
     HEALINGPOTION = 'H_P'
     POISONOUSGAS = 'P_G'
     WHIFF = 'W_H'
     GLOW = 'G_L'
+    EMPTY  = '-'
 
 
 class Cell:
@@ -38,14 +40,23 @@ class Cell:
             Object.HEALINGPOTION.value: 5,
             Object.POISONOUSGAS.value: 6,
             Object.WHIFF.value: 7,
-            Object.GLOW.value: 8
+            Object.GLOW.value: 8,
         }
-
-        for obj in objects_list_str:
-            if obj in percept_mapping:
-                self.percept[percept_mapping[obj]] = True
-            elif obj in {Object.AGENT.value, Object.EMPTY.value}:
-                continue
+        
+        
+        #objects_list_str la 1 ki tu
+        result = []
+        if '/' in objects_list_str: # truong hop 2 dau hieu nam tren 1 cell
+            result.extend(objects_list_str.split('/'))
+            for objects_list_str in result:
+                if objects_list_str in percept_mapping:
+                    self.percept[percept_mapping[objects_list_str]] = True 
+        else:            
+            if objects_list_str in percept_mapping:
+                    
+                self.percept[percept_mapping[objects_list_str]] = True
+            elif objects_list_str in {Object.AGENT.value, Object.EMPTY.value}:
+                pass
             else:
                 raise TypeError('Error: Cell.init')
     def get_literal(self, obj: Object, sign='+'):    # sign='-': not operator
@@ -114,7 +125,7 @@ class Cell:
 
         return adj_cell_list
     #heal
-    def grab_heal(self, kb, cell_matrix):
+    def grab_heal(self, kb, glow_cell, cell_matrix):
         #delete healing potion
         self.percept[5] = False
 
@@ -193,3 +204,6 @@ class Cell:
             if adj_cell.parent is None:
                 self.child_list.append(adj_cell)
                 adj_cell.update_parent(self)
+
+
+    
