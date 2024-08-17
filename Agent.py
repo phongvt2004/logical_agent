@@ -60,7 +60,7 @@ class Agent:
             print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_GOLD:
-            self.score += 100
+            self.score += 5000
             print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_POTION:
@@ -277,16 +277,17 @@ class Agent:
     def backtracking_search(self):
         # If there is a Pit, Agent dies.
         if self.agent_cell.exist_pit():
-            print("ok1")
+            self.score -= 10000
             return False
 
         # If there is a Wumpus, Agent dies.
         if self.agent_cell.exist_wumpus():
-            print("ok2")
+            self.score -= 10000
             return False
         if self.agent_cell.exist_poisonousgas():
             self.HP -= 25
-
+            if self.HP <= 0:
+                return False
         if self.HP < 100 and self.potion > 0:
             self.add_action(Action.HEAL)
 
