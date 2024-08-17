@@ -10,7 +10,8 @@ class Program:
     def __init__(self, file_path):
         self.file_path = file_path
         self.map_matrix = self.read_map()
-        #self.update_percepts()
+        self.update_percepts()
+        self.matrix_cells()
     def custom_split(self, line):
         elements = []
         current_element = ''
@@ -85,8 +86,7 @@ class Program:
     
     def matrix_cells(self):
         N = len(self.map_matrix)
-        matrix = [[Cell((i, j), N, self.map_matrix[i][j]) for j in range(N)] for i in range(N)]
-        return matrix
+        self.cell_matrix = [[Cell((i, j), N, self.map_matrix[i][j]) for j in range(N)] for i in range(N)]
     def display_map(self):
         
         for row in self.map_matrix:
@@ -146,4 +146,4 @@ def test_read_map():
             print(f"Cell at {cell.matrix_pos} with type {cell.percept}")
 
 # Run the test
-test_read_map()
+# test_read_map()

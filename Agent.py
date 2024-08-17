@@ -3,7 +3,7 @@ from enum import Enum
 from Cell import Cell, Object
 from KnowledgeBase import KnowledgeBase
 import copy
-
+from Program import Program
 class Direction(Enum):
     UP = 1
     DOWN = 2
@@ -20,7 +20,7 @@ class Action(Enum):
     CLIMB = 8
 
 class Agent:
-    def __init__(self, program, output_filename):
+    def __init__(self, program: Program, output_filename: str):
         self.program = program
         self.output_filename = output_filename
 
@@ -32,6 +32,7 @@ class Agent:
         self.agent_cell = Cell((9, 0), 10, Object.EMPTY.value)
         self.agent_cell.update_parent(self.cave_cell)
         self.init_agent_cell = Cell((9, 0), 10, Object.EMPTY.value)
+        self.cell_matrix = program.cell_matrix
         self.KB = KnowledgeBase()
         self.path = []
         self.action_list = []
@@ -60,6 +61,11 @@ class Agent:
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_GOLD:
             self.score += 100
+            print('Score: ' + str(self.score))
+            self.append_event_to_output_file('Score: ' + str(self.score))
+        elif action == Action.GRAB_POTION:
+            self.score -= 10
+            self.potion += 1
             print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.SHOOT:
@@ -271,11 +277,18 @@ class Agent:
     def backtracking_search(self):
         # If there is a Pit, Agent dies.
         if self.agent_cell.exist_pit():
+            print("ok1")
             return False
 
         # If there is a Wumpus, Agent dies.
         if self.agent_cell.exist_wumpus():
+            print("ok2")
             return False
+        if self.agent_cell.exist_poisonousgas():
+            self.HP -= 25
+
+        if self.HP < 100 and self.potion > 0:
+            self.add_action(Action.HEAL)
 
         # If there is Gold, Agent grabs Gold.
         if self.agent_cell.exist_gold():
@@ -322,7 +335,6 @@ class Agent:
                     print("Infer: ", end='')
                     print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
-                    self.turn_to(valid_adj_cell)
 
                     # Infer Wumpus.
                     not_alpha = [[valid_adj_cell.get_literal(Object.WUMPUS, '-')]]
@@ -390,7 +402,6 @@ class Agent:
                     print("Infer: ", end='')
                     print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
-                    self.turn_to(valid_adj_cell)
 
                     # Infer Pit.
                     not_alpha = [[valid_adj_cell.get_literal(Object.PIT, '-')]]
@@ -434,7 +445,6 @@ class Agent:
                     print("Infer: ", end='')
                     print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
-                    self.turn_to(valid_adj_cell)
 
                     # Infer Poisonous Gas.
                     not_alpha = [[valid_adj_cell.get_literal(Object.POISONOUSGAS, '-')]]
@@ -454,7 +464,8 @@ class Agent:
                         valid_adj_cell.update_parent(valid_adj_cell)
 
                         # Discard these cells from the valid_adj_cell_list.
-                        temp_adj_cell_list.append(valid_adj_cell)
+                        if self.HP <= 50:
+                            temp_adj_cell_list.append(valid_adj_cell)
 
                     # If we can not infer Poisonous Gas.
                     else:
@@ -470,7 +481,8 @@ class Agent:
                         # If we can not infer not Poisonous Gas.
                         else:
                             # Discard these cells from the valid_adj_cell_list.
-                            temp_adj_cell_list.append(valid_adj_cell)
+                            if self.HP <= 50:
+                                temp_adj_cell_list.append(valid_adj_cell)
 
         temp_adj_cell_list = list(set(temp_adj_cell_list))
 
@@ -503,17 +515,21 @@ class Agent:
 
         self.backtracking_search()
 
-        victory_flag = True
-        for cell_row in self.cell_matrix:
-            for cell in cell_row:
-                if cell.exist_gold() or cell.exist_wumpus():
-                    victory_flag = False
-                    break
-        if victory_flag:
-            self.add_action(Action.KILL_ALL_WUMPUS_AND_GRAB_ALL_FOOD)
+        # victory_flag = True
+        # for cell_row in self.cell_matrix:
+        #     for cell in cell_row:
+        #         if cell.exist_gold() or cell.exist_wumpus():
+        #             victory_flag = False
+        #             break
+        # if victory_flag:
+        #     self.add_action(Action.KILL_ALL_WUMPUS_AND_GRAB_ALL_FOOD)
 
         if self.agent_cell.parent == self.cave_cell:
-            self.add_action(Action.CLIMB_OUT_OF_THE_CAVE)
-
+            self.add_action(Action.CLIMB)
+        print(self.score)
         return self.action_list, self.init_agent_cell, self.init_cell_matrix
 
+if __name__ == '__main__':
+    program = Program("./map1.txt")
+    agent = Agent(program, "out1.txt")
+    agent.solve_wumpus_world()

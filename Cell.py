@@ -18,7 +18,7 @@ class Object(Enum):
 class Cell:
     def __init__(self, matrix_pos, map_size, objects_str):
         self.matrix_pos = matrix_pos                                            # (0, 0) (0, 1) ... (9, 9)   (TL -> BR)
-        self.map_pos = matrix_pos[1] + 1, map_size - matrix_pos[0]              # (1, 1) (1, 2) ... (10, 10) (BL -> TR)
+        self.map_pos = map_size - matrix_pos[0], matrix_pos[1] + 1             # (1, 1) (1, 2) ... (10, 10) (BL -> TR)
         self.index_pos = map_size * (self.map_pos[1] - 1) + self.map_pos[0]     # 1 2 3 ... 99 100           (BL -> TR)
         self.map_size = map_size
 
@@ -125,7 +125,7 @@ class Cell:
 
         return adj_cell_list
     #heal
-    def grab_heal(self, kb, glow_cell, cell_matrix):
+    def grab_heal(self, kb, cell_matrix):
         #delete healing potion
         self.percept[5] = False
 
