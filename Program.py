@@ -55,7 +55,7 @@ class Program:
                         if 0 <= ni < N and 0 <= nj < N:
                             if self.map_matrix[ni][nj] == '-':
                                 self.map_matrix[ni][nj] = 'S'
-                            else:
+                            elif 'S' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/S' # Stench
                              
                 if  self.map_matrix[i][j]== 'P':  # Pit
@@ -64,23 +64,23 @@ class Program:
                         if 0 <= ni < N and 0 <= nj < N:
                             if self.map_matrix[ni][nj] == '-':
                                 self.map_matrix[ni][nj] = 'B'
-                            else:
-                                self.map_matrix[ni][nj] += '/B'  # Breeze
+                            elif 'B' not in self.map_matrix[ni][nj]:
+                                self.map_matrix[ni][nj] += '/B' # Breeze
                 if  self.map_matrix[i][j] == 'P_G' :  # Poisonous Gas
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
                             if self.map_matrix[ni][nj] == '-':
                                 self.map_matrix[ni][nj] = 'W_H'
-                            else:
-                                self.map_matrix[ni][nj] += '/W_H'  # Whiff
+                            elif 'W_H' not in self.map_matrix[ni][nj]:
+                                self.map_matrix[ni][nj] += '/W_H'   # Whiff
                 if  self.map_matrix[i][j] == 'H_P':  # Healing Potions
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
                             if self.map_matrix[ni][nj] == '-':
                                 self.map_matrix[ni][nj] = 'G_L'
-                            else:
+                            elif 'G_L' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/G_L'  # Glow
         
     def display_map(self):
