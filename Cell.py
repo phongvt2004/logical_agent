@@ -1,5 +1,4 @@
 from enum import Enum
-
 class Object(Enum):
     GOLD   = 'G'
     PIT    = 'P'
@@ -115,7 +114,7 @@ class Cell:
 
         return adj_cell_list
     #heal
-    def grab_heal(self, kb, glow_cell, cell_matrix):
+    def grab_heal(self, kb, cell_matrix):
         #delete healing potion
         self.percept[5] = False
 
@@ -194,6 +193,3 @@ class Cell:
             if adj_cell.parent is None:
                 self.child_list.append(adj_cell)
                 adj_cell.update_parent(self)
-
-
-    

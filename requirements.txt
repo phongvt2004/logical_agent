@@ -1,0 +1,4 @@
+numpy
+pyDatalog
+python-sat
+pygame

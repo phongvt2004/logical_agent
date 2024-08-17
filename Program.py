@@ -8,7 +8,7 @@ class Direction(Enum):
 class Program:
     def __init__(self, file_path):
         self.file_path = file_path
-        self.map_matrix = self.read_map()
+        self.map_matrix, self.n = self.read_map()
         #self.update_percepts()
     def custom_split(self, line):
         elements = []
@@ -42,14 +42,15 @@ class Program:
             
             
          
-        return map_matrix
+        return map_matrix, N
     def update_percepts(self):
-        N = len(self.map_matrix)
+        N = self.n
+        print(len(self.map_matrix))
         directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
         
         for i in range(N):
             for j in range(N):
-                if  self.map_matrix[i][j] == 'W':  # Wumpus
+                if self.map_matrix[i][j] == 'W':  # Wumpus
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -58,7 +59,7 @@ class Program:
                             else:
                                 self.map_matrix[ni][nj] += '/S' # Stench
                              
-                if  self.map_matrix[i][j]== 'P':  # Pit
+                if self.map_matrix[i][j]== 'P':  # Pit
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -66,7 +67,7 @@ class Program:
                                 self.map_matrix[ni][nj] = 'B'
                             else:
                                 self.map_matrix[ni][nj] += '/B'  # Breeze
-                if  self.map_matrix[i][j] == 'P_G' :  # Poisonous Gas
+                if self.map_matrix[i][j] == 'P_G' :  # Poisonous Gas
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -74,7 +75,7 @@ class Program:
                                 self.map_matrix[ni][nj] = 'W_H'
                             else:
                                 self.map_matrix[ni][nj] += '/W_H'  # Whiff
-                if  self.map_matrix[i][j] == 'H_P':  # Healing Potions
+                if self.map_matrix[i][j] == 'H_P':  # Healing Potions
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -128,12 +129,13 @@ class Program:
             return "Invalid action"
 
                                             ##### TEST MAP #####
-file_path = 'map1.txt'
-program = Program(file_path)
-print('Initial map:')
-program.display_map()
-print('Updated map:')
-program.update_percepts()
-program.display_map()
+if __name__ == '__main__':
+    file_path = 'map1.txt'
+    program = Program(file_path)
+    print('Initial map:')
+    program.display_map()
+    print('Updated map:')
+    program.update_percepts()
+    program.display_map()
 
 
