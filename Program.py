@@ -1,4 +1,5 @@
-import numpy as np
+import numpy as np 
+from Cell import Cell
 from enum import Enum
 class Direction(Enum):
     UP = (-1, 0)
@@ -39,7 +40,6 @@ class Program:
         for i in range(1, N+1):
             row = self.custom_split(lines[i].strip())
             map_matrix[i-1] = row
-            
             
          
         return map_matrix
@@ -82,7 +82,11 @@ class Program:
                                 self.map_matrix[ni][nj] = 'G_L'
                             elif 'G_L' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/G_L'  # Glow
-        
+    
+    def matrix_cells(self):
+        N = len(self.map_matrix)
+        matrix = [[Cell((i, j), N, self.map_matrix[i][j]) for j in range(N)] for i in range(N)]
+        return matrix
     def display_map(self):
         
         for row in self.map_matrix:
@@ -128,12 +132,18 @@ class Program:
             return "Invalid action"
 
                                             ##### TEST MAP #####
-file_path = 'map1.txt'
-program = Program(file_path)
-print('Initial map:')
-program.display_map()
-print('Updated map:')
-program.update_percepts()
-program.display_map()
+def test_read_map():
+    program = Program('test1.txt')
+    program.update_percepts()
+    program.display_map()
+    print('==========================')
+    program.map_matrix = program.matrix_cells()
+    map_matrix = program.map_matrix
+    
+    for row in map_matrix:
+        for cell in row:
+            assert isinstance(cell, Cell), f"Expected Cell, got {type(cell)}"
+            print(f"Cell at {cell.matrix_pos} with type {cell.percept}")
 
-
+# Run the test
+test_read_map()
