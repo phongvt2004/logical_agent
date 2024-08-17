@@ -10,8 +10,7 @@ class Program:
     def __init__(self, file_path):
         self.file_path = file_path
         self.map_matrix = self.read_map()
-        self.update_percepts()
-        self.matrix_cells()
+        #self.update_percepts()
     def custom_split(self, line):
         elements = []
         current_element = ''
@@ -50,7 +49,9 @@ class Program:
         
         for i in range(N):
             for j in range(N):
-                if  self.map_matrix[i][j] == 'W':  # Wumpus
+                result = []
+                result.extend(self.map_matrix[i][j].split('/'))
+                if  'W' in result:  # Wumpus
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -59,7 +60,7 @@ class Program:
                             elif 'S' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/S' # Stench
                              
-                if  self.map_matrix[i][j]== 'P':  # Pit
+                if  'P' in result:  # Pit
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -67,7 +68,7 @@ class Program:
                                 self.map_matrix[ni][nj] = 'B'
                             elif 'B' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/B' # Breeze
-                if  self.map_matrix[i][j] == 'P_G' :  # Poisonous Gas
+                if  'P_G' in result :  # Poisonous Gas
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -75,7 +76,7 @@ class Program:
                                 self.map_matrix[ni][nj] = 'W_H'
                             elif 'W_H' not in self.map_matrix[ni][nj]:
                                 self.map_matrix[ni][nj] += '/W_H'   # Whiff
-                if  self.map_matrix[i][j] == 'H_P':  # Healing Potions
+                if  'H_P' in result:  # Healing Potions
                     for direction in directions:
                         ni, nj = i + direction.value[0], j + direction.value[1]
                         if 0 <= ni < N and 0 <= nj < N:
@@ -86,7 +87,8 @@ class Program:
     
     def matrix_cells(self):
         N = len(self.map_matrix)
-        self.cell_matrix = [[Cell((i, j), N, self.map_matrix[i][j]) for j in range(N)] for i in range(N)]
+        matrix = [[Cell((i, j), N, self.map_matrix[i][j]) for j in range(N)] for i in range(N)]
+        return matrix
     def display_map(self):
         
         for row in self.map_matrix:
@@ -146,4 +148,4 @@ def test_read_map():
             print(f"Cell at {cell.matrix_pos} with type {cell.percept}")
 
 # Run the test
-# test_read_map()
+test_read_map()
