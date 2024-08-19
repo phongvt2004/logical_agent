@@ -283,7 +283,7 @@ class Agent:
             self.HP -= 25
             if self.HP <= 0:
                 return False
-        if self.HP < 100 and self.potion > 0:
+        while self.HP < 100 and self.potion > 0:
             self.add_action(Action.HEAL)
 
         # If there is Gold, Agent grabs Gold.
@@ -510,6 +510,6 @@ class Agent:
         return self.action_list, self.init_cell_matrix
 
 if __name__ == '__main__':
-    program = Program("./map2.txt")
-    agent = Agent(program, "out2.txt")
+    program = Program("./map1.txt")
+    agent = Agent(program, "out1.txt")
     agent.solve_wumpus_world()
