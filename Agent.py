@@ -26,7 +26,7 @@ class Agent:
 
         self.map_size = None
         self.cell_matrix = None
-        self.init_cell_matrix = None
+        self.init_cell_matrix = copy.deepcopy(self.program.cell_matrix)
 
         self.cave_cell = Cell((-1, -1), 10, Object.EMPTY.value)
         self.agent_cell = Cell((9, 0), 10, Object.EMPTY.value)
@@ -366,7 +366,32 @@ class Agent:
                             # Discard these cells from the valid_adj_cell_list.
                             if valid_adj_cell not in temp_adj_cell_list:
                                 temp_adj_cell_list.append(valid_adj_cell)
+            if self.agent_cell.exist_stench():
+                adj_cell_list = self.agent_cell.get_adj_cell_list(self.cell_matrix)
+                if self.agent_cell.parent in adj_cell_list:
+                    adj_cell_list.remove(self.agent_cell.parent)
 
+                explored_cell_list = []
+                for adj_cell in adj_cell_list:
+                    if adj_cell.is_explored():
+                        explored_cell_list.append(adj_cell)
+                for explored_cell in explored_cell_list:
+                    adj_cell_list.remove(explored_cell)
+
+                for adj_cell in adj_cell_list:
+                    print("Try: ", end='')
+                    print(adj_cell.map_pos)
+                    self.append_event_to_output_file('Try: ' + str(adj_cell.map_pos))
+                    self.turn_to(adj_cell)
+
+                    self.add_action(Action.SHOOT)
+                    if adj_cell.exist_wumpus():
+                        adj_cell.kill_wumpus(self.cell_matrix, self.KB)
+                        self.append_event_to_output_file('KB: ' + str(self.KB.KB))
+
+                    if not self.agent_cell.exist_stench():
+                        self.agent_cell.update_child_list([adj_cell])
+                        break
             # If the current cell has Breeze, Agent infers whether the adjacent cells have Pit.
             if self.agent_cell.exist_breeze():
                 valid_adj_cell: Cell
@@ -499,7 +524,7 @@ class Agent:
         if self.agent_cell.parent == self.cave_cell:
             self.add_action(Action.CLIMB)
         print(self.score)
-        return self.action_list, self.init_agent_cell, self.init_cell_matrix
+        return self.action_list, self.init_cell_matrix
 
 if __name__ == '__main__':
     program = Program("./map1.txt")
