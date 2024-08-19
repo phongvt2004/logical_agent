@@ -8,16 +8,19 @@ class Screen:
                  height: int,
                  width: int,
                  font: pygame.font.Font,
-                 background: str = None
+                 background: str | pygame.surface.SurfaceType = None
                  ) -> None:
         self.screen = screen
         self.running = True
         self.SCREEN_HEIGHT = height
         self.SCREEN_WIDTH = width
 
-        if background:
-            self.background = pygame.image.load(background)
-            self.background = pygame.transform.scale(self.background, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        if background is not None:
+            if isinstance(background, pygame.surface.SurfaceType):
+                self.background = background
+            else:
+                self.background = pygame.image.load(background)
+                self.background = pygame.transform.scale(self.background, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         else:
             self.background = None
 

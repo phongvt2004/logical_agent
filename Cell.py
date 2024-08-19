@@ -14,6 +14,20 @@ class Object(Enum):
     GLOW = 'G_L'
     EMPTY  = '-'
 
+def get_percept(pos: int):
+    percepts = {
+        0: Object.GOLD,
+        1: Object.PIT,
+        2: Object.WUMPUS,
+        3: Object.BREEZE,
+        4: Object.STENCH,
+        5: Object.HEALINGPOTION,
+        6: Object.POISONOUSGAS,
+        7: Object.WHIFF,
+        8: Object.GLOW
+    }
+    return percepts.get(pos, Object.EMPTY).value
+
 
 class Cell:
     def __init__(self, matrix_pos, map_size, objects_str):

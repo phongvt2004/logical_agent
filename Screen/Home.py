@@ -3,6 +3,7 @@ from Screen.Screen import Screen
 from Component.Text import Text
 from Constant import Color
 from Component.Button import ImageButton
+from Screen.Main import Main
 
 
 class Home(Screen):
@@ -15,9 +16,17 @@ class Home(Screen):
     def handle_map(self, inp: int) -> callable:
         def handle() -> None:
             if inp == 1:
+                map_file = "./map1.txt"
+                output_file = "./out1.txt"
                 pass
             elif inp == 2:
+                map_file = "./map2.txt"
+                output_file = "./out1.txt"
                 pass
+            else:
+                return
+
+            Main(map_file, output_file, self.screen, self.SCREEN_HEIGHT, self.SCREEN_WIDTH, self.font, self.background).run()
 
         return handle
 
