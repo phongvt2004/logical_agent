@@ -49,14 +49,19 @@ class Main(Screen):
         self.actions, self.cell_matrix = self.agent.solve_wumpus_world()
         self.direction = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         self.current_direction = 0
-        self.cell_w = 110
-        self.cell_h = 60
+        self.cell_w = 80
+        self.cell_h = 80
         self.grid_w = self.cell_w * len(self.program.cell_matrix)
         self.grid_h = self.cell_h * len(self.program.cell_matrix)
         font_url = "./Assets/Poppins.ttf"
         self.font = pygame.font.Font(font_url, 15)
         self.agent_pos = (0, len(self.program.cell_matrix) - 1)
         self.state = 0
+        self.shoot = Image("./Assets/characters/arrow.png", 0.015)
+        self.current_action = ""
+        self.score = 0
+        self.HP = 100
+        self.potion = 0
 
     def turn_right(self):
         self.current_direction += 1
@@ -100,7 +105,7 @@ class Main(Screen):
         rect = pygame.Rect(x, y, self.cell_w, self.cell_h)
         pos = rect.center
         for (i, per) in enumerate(obj):
-            img = Image(get_percept_icon(per), 0.008)
+            img = Image(get_percept_icon(per), 0.01)
             if len(obj) == 1:
                 pos_x = pos[0]
             elif i == 0:
@@ -113,7 +118,7 @@ class Main(Screen):
     def draw_agent(self, x: int, y: int):
         rect = pygame.Rect(x, y, self.cell_w, self.cell_h)
         pos = rect.center
-        img = Image(get_percept_icon("A"), 0.02)
+        img = Image(get_percept_icon("A"), 0.012)
         img.show(self.screen, pos[0], pos[1])
 
     def drawGrid(self, start_x: int, start_y: int):
@@ -125,31 +130,53 @@ class Main(Screen):
                 pos_x = (x - start_x) // self.cell_w
                 pos_y = (y - start_y) // self.cell_h
 
-                self.drawCell(self.cell_matrix[pos_y][pos_x].percept, x, y)
-
                 if (pos_x, pos_y) == self.agent_pos:
                     self.draw_agent(x, y)
+                    self.drawCell(self.cell_matrix[pos_y][pos_x].percept, x, y)
+                else:
+                    self.drawRect(x, y, Color.GREY)
+                    self.drawRect(x, y, Color.WHITE, 1)
+
+        ladder = Image("./Assets/characters/ladder.png", 0.02)
+        ladder.show(self.screen, 50, self.cell_h * len(self.cell_matrix) + 50)
+        print(self.cell_h * (len(self.cell_matrix) - 1))
 
     def update_state(self):
         action = self.actions[self.state]
         print(action)
+        self.current_action = f"Action: {action}"
 
         if action == Action.MOVE_FORWARD:
+            pos = self.agent_pos
+            if self.cell_matrix[pos[1]][pos[0]].exist_poisonousgas():
+                self.HP -= 25
             self.move_forward()
+            self.score -= 10
         elif action == Action.TURN_RIGHT:
             self.turn_right()
         elif action == Action.TURN_LEFT:
             self.turn_left()
         elif action == Action.GRAB_GOLD:
+            self.score += 5000
+            self.score -= 10
             pos = self.agent_pos
             self.cell_matrix[pos[1]][pos[0]].grab_gold()
         elif action == Action.GRAB_POTION:
+            self.score -= 10
+            self.potion += 1
             pos = self.agent_pos
             self.cell_matrix[pos[1]][pos[0]].grab_heal(cell_matrix=self.cell_matrix)
         elif action == Action.SHOOT:
+            self.score -= 100
             pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
             self.cell_matrix[pos[1]][pos[0]].kill_wumpus(self.cell_matrix)
-        print(self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].map_pos)
+        elif action == Action.CLIMB:
+            self.score += 10
+        elif action == Action.HEAL:
+            self.score -= 10
+            self.HP = min(100, self.HP + 25)
+            self.potion -= 1
+
         self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].explore()
         self.state += 1
 
@@ -162,7 +189,26 @@ class Main(Screen):
             self.draw_background()
             self.drawGrid(50, 50)
 
+            if self.actions[self.state] == Action.SHOOT:
+                pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
+                print(pos[0] * self.cell_w + 50, pos[1] * self.cell_h + 50)
+                self.shoot.show(self.screen, pos[0] * self.cell_w + 50 + self.cell_w // 2, pos[1] * self.cell_h + 50 + self.cell_h // 2)
+
+            font_url = "./Assets/Poppins.ttf"
+            font = pygame.font.Font(font_url, 30)
+            t1 = Text(self.current_action, font, Color.WHITE)
+            t1.show(self.screen, 1200, 80)
+            t2 = Text(f"Score: {self.score}", font, Color.WHITE)
+            t2.show(self.screen, 1200, 150)
+            t3 = Text(f"HP: {self.HP}", font, Color.WHITE)
+            t3.show(self.screen, 1200, 220)
+            t3 = Text(f"Potion: {self.potion}", font, Color.WHITE)
+            t3.show(self.screen, 1200, 290)
+
             pygame.display.update()
 
             if self.state < len(self.actions) - 1:
                 self.update_state()
+                sleep(0.2)
+            if self.state == len(self.actions) - 1:
+                self.draw_agent(len(self.cell_matrix), len(self.cell_matrix))
