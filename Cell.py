@@ -173,7 +173,7 @@ class Cell:
             kb.del_clause([glow_cell.get_literal(Object.GLOW, '+'), adj_cell.get_literal(Object.HEALINGPOTION, '-')])
 
 
-    def kill_wumpus(self, cell_matrix, kb):
+    def kill_wumpus(self, cell_matrix, kb=None):
         # Delete Wumpus.
         self.percept[2] = False
 
@@ -184,7 +184,8 @@ class Cell:
             if not any(adj_cell.exist_wumpus() for adj_cell in stench_cell.get_adj_cell_list(cell_matrix)):
                 # Remove stench perception from the stench cell.
                 stench_cell.percept[4] = False
-                self.update_kb_stench(kb, stench_cell, cell_matrix)
+                if kb:
+                    self.update_kb_stench(kb, stench_cell, cell_matrix)
 
     def update_kb_stench(self, kb, stench_cell, cell_matrix):
         # Remove existing clause: Stench at this cell.

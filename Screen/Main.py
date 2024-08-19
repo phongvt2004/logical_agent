@@ -125,7 +125,7 @@ class Main(Screen):
                 pos_x = (x - start_x) // self.cell_w
                 pos_y = (y - start_y) // self.cell_h
 
-                self.drawCell(self.cell_matrix[pos_x][pos_y].percept, x, y)
+                self.drawCell(self.cell_matrix[pos_y][pos_x].percept, x, y)
 
                 if (pos_x, pos_y) == self.agent_pos:
                     self.draw_agent(x, y)
@@ -145,7 +145,10 @@ class Main(Screen):
             self.cell_matrix[pos[1]][pos[0]].grab_gold()
         elif action == Action.GRAB_POTION:
             pos = self.agent_pos
-            self.cell_matrix[pos[1]][pos[0]].grab_heal()
+            self.cell_matrix[pos[1]][pos[0]].grab_heal(cell_matrix=self.cell_matrix)
+        elif action == Action.SHOOT:
+            pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
+            self.cell_matrix[pos[1]][pos[0]].kill_wumpus(self.cell_matrix)
         print(self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].map_pos)
         self.state += 1
 
