@@ -150,6 +150,7 @@ class Main(Screen):
             pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
             self.cell_matrix[pos[1]][pos[0]].kill_wumpus(self.cell_matrix)
         print(self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].map_pos)
+        self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].explore()
         self.state += 1
 
     def run(self) -> None:
