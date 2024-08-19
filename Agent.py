@@ -212,8 +212,8 @@ class Agent:
         self.append_event_to_output_file(str(self.KB.KB))
 
     def turn_to(self, next_cell):
-        if next_cell.map_pos[0] == self.agent_cell.map_pos[0]:
-            if next_cell.map_pos[1] - self.agent_cell.map_pos[1] == 1:
+        if next_cell.map_pos[1] == self.agent_cell.map_pos[1]:
+            if next_cell.map_pos[0] - self.agent_cell.map_pos[0] == 1:
                 if self.direction == Direction.UP:
                     pass
                 elif self.direction == Direction.DOWN:
@@ -235,8 +235,8 @@ class Agent:
                 else:
                     self.add_action(Action.TURN_RIGHT)
                 self.direction = Direction.DOWN
-        elif next_cell.map_pos[1] == self.agent_cell.map_pos[1]:
-            if next_cell.map_pos[0] - self.agent_cell.map_pos[0] == 1:
+        elif next_cell.map_pos[0] == self.agent_cell.map_pos[0]:
+            if next_cell.map_pos[1] - self.agent_cell.map_pos[1] == 1:
                 if self.direction == Direction.UP:
                     self.add_action(Action.TURN_RIGHT)
                 elif self.direction == Direction.DOWN:

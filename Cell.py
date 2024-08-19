@@ -139,7 +139,7 @@ class Cell:
 
         return adj_cell_list
     #heal
-    def grab_heal(self, kb, cell_matrix):
+    def grab_heal(self, kb=None, cell_matrix=None):
         #delete healing potion
         self.percept[5] = False
 
@@ -150,7 +150,8 @@ class Cell:
             if not any(adj_cell.exist_healingpotion() for adj_cell in glow_cell.get_adj_cell_list(cell_matrix)):
                 #Remove glow perception from the glow cell
                 glow_cell.percept[8] = False
-                self.update_kb_glow(kb, glow_cell, cell_matrix)
+                if kb:
+                    self.update_kb_glow(kb, glow_cell, cell_matrix)
     
 
     def update_kb_glow(self, kb, glow_cell, cell_matrix):

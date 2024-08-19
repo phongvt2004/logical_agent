@@ -133,6 +133,7 @@ class Main(Screen):
     def update_state(self):
         action = self.actions[self.state]
         print(action)
+
         if action == Action.MOVE_FORWARD:
             self.move_forward()
         elif action == Action.TURN_RIGHT:
@@ -141,10 +142,11 @@ class Main(Screen):
             self.turn_left()
         elif action == Action.GRAB_GOLD:
             pos = self.agent_pos
-            self.cell_matrix[pos[0]][pos[1]].grab_gold()
+            self.cell_matrix[pos[1]][pos[0]].grab_gold()
         elif action == Action.GRAB_POTION:
             pos = self.agent_pos
-            self.cell_matrix[pos[0]][pos[1]].grab_heal()
+            self.cell_matrix[pos[1]][pos[0]].grab_heal()
+        print(self.cell_matrix[self.agent_pos[1]][self.agent_pos[0]].map_pos)
         self.state += 1
 
     def run(self) -> None:
