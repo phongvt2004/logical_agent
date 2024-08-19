@@ -1,6 +1,8 @@
+from time import sleep
+
 import pygame
 
-from Agent import Agent
+from Agent import Agent, Action
 from Cell import get_percept
 from Component.Component import Component
 from Program import Program
@@ -45,12 +47,28 @@ class Main(Screen):
         self.program = Program(inp)
         self.agent = Agent(self.program, output)
         self.actions, self.cell_matrix = self.agent.solve_wumpus_world()
+        self.direction = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        self.current_direction = 0
         self.cell_w = 110
         self.cell_h = 60
         self.grid_w = self.cell_w * len(self.program.cell_matrix)
         self.grid_h = self.cell_h * len(self.program.cell_matrix)
         font_url = "./Assets/Poppins.ttf"
         self.font = pygame.font.Font(font_url, 15)
+        self.agent_pos = (0, len(self.program.cell_matrix) - 1)
+        self.state = 0
+
+    def turn_right(self):
+        self.current_direction += 1
+        self.current_direction %= len(self.direction)
+
+    def turn_left(self):
+        if self.current_direction == 0:
+            self.current_direction = len(self.direction)
+        self.current_direction -= 1
+
+    def move_forward(self):
+        self.agent_pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
 
     def drawRect(self, x: int, y: int, color: tuple, color_mode: int = 0) -> None:
         rect = pygame.Rect(x, y, self.cell_w, self.cell_h)
@@ -92,6 +110,12 @@ class Main(Screen):
             pos_y = pos[1] + 10 if len(text) else pos[1]
             img.show(self.screen, pos_x, pos_y)
 
+    def draw_agent(self, x: int, y: int):
+        rect = pygame.Rect(x, y, self.cell_w, self.cell_h)
+        pos = rect.center
+        img = Image(get_percept_icon("A"), 0.02)
+        img.show(self.screen, pos[0], pos[1])
+
     def drawGrid(self, start_x: int, start_y: int):
         end_x = start_x + self.grid_w
         end_y = start_y + self.grid_h
@@ -101,8 +125,27 @@ class Main(Screen):
                 pos_x = (x - start_x) // self.cell_w
                 pos_y = (y - start_y) // self.cell_h
 
-                # print(f"({pos_x}, {pos_y}):", self.program.cell_matrix[pos_x][pos_y].percept)
                 self.drawCell(self.cell_matrix[pos_x][pos_y].percept, x, y)
+
+                if (pos_x, pos_y) == self.agent_pos:
+                    self.draw_agent(x, y)
+
+    def update_state(self):
+        action = self.actions[self.state]
+        print(action)
+        if action == Action.MOVE_FORWARD:
+            self.move_forward()
+        elif action == Action.TURN_RIGHT:
+            self.turn_right()
+        elif action == Action.TURN_LEFT:
+            self.turn_left()
+        elif action == Action.GRAB_GOLD:
+            pos = self.agent_pos
+            self.cell_matrix[pos[0]][pos[1]].grab_gold()
+        elif action == Action.GRAB_POTION:
+            pos = self.agent_pos
+            self.cell_matrix[pos[0]][pos[1]].grab_heal()
+        self.state += 1
 
     def run(self) -> None:
         while self.running:
@@ -114,3 +157,6 @@ class Main(Screen):
             self.drawGrid(50, 50)
 
             pygame.display.update()
+
+            if self.state < len(self.actions) - 1:
+                self.update_state()

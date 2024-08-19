@@ -48,7 +48,6 @@ class Agent:
 
     def add_action(self, action):
         self.action_list.append(action)
-        print(action)
         self.append_event_to_output_file(action.name)
 
         if action == Action.TURN_LEFT:
@@ -57,30 +56,24 @@ class Agent:
             pass
         elif action == Action.MOVE_FORWARD:
             self.score -= 10
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_GOLD:
             self.score += 5000
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_POTION:
             self.score -= 10
             self.potion += 1
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.SHOOT:
             self.score -= 100
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.CLIMB:
             self.score += 10
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.HEAL:
             self.score -= 10
             self.HP = min(100, self.HP + 25)
             self.potion -= 1
-            print('Score: ' + str(self.score))
             self.append_event_to_output_file('Score: ' + str(self.score))
         else:
             raise TypeError("Error: " + self.add_action.__name__)
@@ -216,7 +209,6 @@ class Agent:
             for adj_cell in adj_cell_list:
                 clause = [adj_cell.get_literal(Object.HEALINGPOTION, '-')]
                 self.KB.add_clause(clause)
-        print(self.KB.KB)
         self.append_event_to_output_file(str(self.KB.KB))
 
     def turn_to(self, next_cell):
@@ -333,8 +325,6 @@ class Agent:
             if self.agent_cell.exist_stench():
                 valid_adj_cell: Cell
                 for valid_adj_cell in valid_adj_cell_list:
-                    print("Infer: ", end='')
-                    print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
 
                     # Infer Wumpus.
@@ -379,8 +369,6 @@ class Agent:
                     adj_cell_list.remove(explored_cell)
 
                 for adj_cell in adj_cell_list:
-                    print("Try: ", end='')
-                    print(adj_cell.map_pos)
                     self.append_event_to_output_file('Try: ' + str(adj_cell.map_pos))
                     self.turn_to(adj_cell)
 
@@ -396,8 +384,6 @@ class Agent:
             if self.agent_cell.exist_breeze():
                 valid_adj_cell: Cell
                 for valid_adj_cell in valid_adj_cell_list:
-                    print("Infer: ", end='')
-                    print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
 
                     # Infer Pit.
@@ -439,8 +425,6 @@ class Agent:
             if self.agent_cell.exist_whiff():
                 valid_adj_cell: Cell
                 for valid_adj_cell in valid_adj_cell_list:
-                    print("Infer: ", end='')
-                    print(valid_adj_cell.map_pos)
                     self.append_event_to_output_file('Infer: ' + str(valid_adj_cell.map_pos))
 
                     # Infer Poisonous Gas.
@@ -491,16 +475,12 @@ class Agent:
         # Move to all of the valid next cells sequentially.
         for next_cell in self.agent_cell.child_list:
             self.move_to(next_cell)
-            print("Move to: ", end='')
-            print(self.agent_cell.map_pos)
             self.append_event_to_output_file('Move to: ' + str(self.agent_cell.map_pos))
 
             if not self.backtracking_search():
                 return False
 
             self.move_to(pre_agent_cell)
-            print("Backtrack: ", end='')
-            print(pre_agent_cell.map_pos)
             self.append_event_to_output_file('Backtrack: ' + str(pre_agent_cell.map_pos))
 
         return True
@@ -523,7 +503,7 @@ class Agent:
 
         if self.agent_cell.parent == self.cave_cell:
             self.add_action(Action.CLIMB)
-        print(self.score)
+        print("Score:", self.score)
         return self.action_list, self.init_cell_matrix
 
 if __name__ == '__main__':
