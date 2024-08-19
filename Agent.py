@@ -51,13 +51,16 @@ class Agent:
         self.append_event_to_output_file(action.name)
 
         if action == Action.TURN_LEFT:
-            pass
+            self.score -= 10
+            self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.TURN_RIGHT:
-            pass
+            self.score -= 10
+            self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.MOVE_FORWARD:
             self.score -= 10
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_GOLD:
+            self.score -= 10
             self.score += 5000
             self.append_event_to_output_file('Score: ' + str(self.score))
         elif action == Action.GRAB_POTION:
