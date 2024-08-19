@@ -12,13 +12,14 @@ from Constant import Color
 from Component.Button import ImageButton
 
 class Image(Component):
-    def __init__(self, url: str, scale: float):
+    def __init__(self, url: str, scale: float, rotate: float = 0):
         image = pygame.image.load(url)
         image = image.convert_alpha()
 
         width = image.get_width()
         height = image.get_height()
         self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+        self.image = pygame.transform.rotate(self.image, rotate)
 
     def show(self, screen: pygame.Surface, x: int, y: int) -> None:
         width = self.image.get_width()
@@ -62,6 +63,12 @@ class Main(Screen):
         self.score = 0
         self.HP = 100
         self.potion = 0
+        self.robot = [
+            Image(get_percept_icon("A"), 0.012),
+            Image(get_percept_icon("A"), 0.012, 90),
+            Image(get_percept_icon("A"), 0.012, 180),
+            Image(get_percept_icon("A"), 0.012, 270)
+        ]
 
     def turn_right(self):
         self.current_direction += 1
@@ -118,8 +125,7 @@ class Main(Screen):
     def draw_agent(self, x: int, y: int):
         rect = pygame.Rect(x, y, self.cell_w, self.cell_h)
         pos = rect.center
-        img = Image(get_percept_icon("A"), 0.012)
-        img.show(self.screen, pos[0], pos[1])
+        self.robot[self.current_direction].show(self.screen, pos[0], pos[1])
 
     def drawGrid(self, start_x: int, start_y: int):
         end_x = start_x + self.grid_w
@@ -130,7 +136,7 @@ class Main(Screen):
                 pos_x = (x - start_x) // self.cell_w
                 pos_y = (y - start_y) // self.cell_h
 
-                if (pos_x, pos_y) == self.agent_pos:
+                if (pos_x, pos_y) == self.agent_pos and self.state < len(self.actions) - 1:
                     self.draw_agent(x, y)
                     self.drawCell(self.cell_matrix[pos_y][pos_x].percept, x, y)
                 else:
@@ -189,7 +195,7 @@ class Main(Screen):
             self.draw_background()
             self.drawGrid(50, 50)
 
-            if self.actions[self.state] == Action.SHOOT:
+            if self.state < len(self.actions) and self.actions[self.state] == Action.SHOOT:
                 pos = tuple(map(lambda i, j: i + j, self.agent_pos, self.direction[self.current_direction]))
                 print(pos[0] * self.cell_w + 50, pos[1] * self.cell_h + 50)
                 self.shoot.show(self.screen, pos[0] * self.cell_w + 50 + self.cell_w // 2, pos[1] * self.cell_h + 50 + self.cell_h // 2)
@@ -205,10 +211,14 @@ class Main(Screen):
             t3 = Text(f"Potion: {self.potion}", font, Color.WHITE)
             t3.show(self.screen, 1200, 290)
 
-            pygame.display.update()
-
             if self.state < len(self.actions) - 1:
                 self.update_state()
                 sleep(0.2)
-            if self.state == len(self.actions) - 1:
-                self.draw_agent(len(self.cell_matrix), len(self.cell_matrix))
+            elif self.state == len(self.actions) - 1:
+                self.draw_agent(0, self.cell_h * len(self.cell_matrix))
+                self.state += 1
+            elif self.state == len(self.actions):
+                print("Climb")
+                self.robot[0].show(self.screen, 50, self.cell_h * (len(self.cell_matrix) + 1))
+
+            pygame.display.update()
