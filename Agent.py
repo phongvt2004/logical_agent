@@ -29,7 +29,7 @@ class Agent:
         self.init_cell_matrix = copy.deepcopy(self.program.cell_matrix)
 
         self.cave_cell = Cell((-1, -1), 10, Object.EMPTY.value)
-        self.agent_cell = Cell((9, 0), 10, Object.EMPTY.value)
+        self.agent_cell = program.cell_matrix[9][0]
         self.agent_cell.update_parent(self.cave_cell)
         self.init_agent_cell = Cell((9, 0), 10, Object.EMPTY.value)
         self.cell_matrix = program.cell_matrix
@@ -510,6 +510,6 @@ class Agent:
         return self.action_list, self.init_cell_matrix
 
 if __name__ == '__main__':
-    program = Program("./map1.txt")
-    agent = Agent(program, "out1.txt")
+    program = Program("./map2.txt")
+    agent = Agent(program, "out2.txt")
     agent.solve_wumpus_world()
