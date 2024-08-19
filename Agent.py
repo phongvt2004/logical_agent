@@ -367,35 +367,6 @@ class Agent:
                             if valid_adj_cell not in temp_adj_cell_list:
                                 temp_adj_cell_list.append(valid_adj_cell)
 
-            # If this cell still has Stench after trying to infer,
-            # the Agent will try to shoot all of valid directions till Stench disappear.
-            if self.agent_cell.exist_stench():
-                adj_cell_list = self.agent_cell.get_adj_cell_list(self.cell_matrix)
-                if self.agent_cell.parent in adj_cell_list:
-                    adj_cell_list.remove(self.agent_cell.parent)
-
-                explored_cell_list = []
-                for adj_cell in adj_cell_list:
-                    if adj_cell.is_explored():
-                        explored_cell_list.append(adj_cell)
-                for explored_cell in explored_cell_list:
-                    adj_cell_list.remove(explored_cell)
-
-                for adj_cell in adj_cell_list:
-                    print("Try: ", end='')
-                    print(adj_cell.map_pos)
-                    self.append_event_to_output_file('Try: ' + str(adj_cell.map_pos))
-                    self.turn_to(adj_cell)
-
-                    self.add_action(Action.SHOOT)
-                    if adj_cell.exist_wumpus():
-                        adj_cell.kill_wumpus(self.cell_matrix, self.KB)
-                        self.append_event_to_output_file('KB: ' + str(self.KB.KB))
-
-                    if not self.agent_cell.exist_stench():
-                        self.agent_cell.update_child_list([adj_cell])
-                        break
-
             # If the current cell has Breeze, Agent infers whether the adjacent cells have Pit.
             if self.agent_cell.exist_breeze():
                 valid_adj_cell: Cell
